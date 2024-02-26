@@ -10,6 +10,8 @@ use renet::{
 use std::net::{ SocketAddr, UdpSocket };
 use std::thread;
 use std::time::{ Duration, Instant, SystemTime };
+use dotenv::dotenv;
+use std::env;
 
 // TicTacTussle converted to utf-8 codes is 84 105 99 84 97 99 84 117 115 115 108 101
 // If you add those up you get 1208.
@@ -29,7 +31,14 @@ fn name_from_user_data(user_data: &[u8; NETCODE_USER_DATA_BYTES]) -> String {
 fn main() {
     env_logger::init();
 
-    let server_addr: SocketAddr = format!("{}:{}", env!("HOST"), env!("PORT")).parse().unwrap();
+    // Load environment variables from the .env file
+    dotenv().ok();
+
+    // Retrieve the values using std::env::var
+    let host = env::var("HOST").expect("HOST not set in .env");
+    let port = env::var("PORT").expect("PORT not set in .env");
+
+    let server_addr: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
     let mut server: RenetServer = RenetServer::new(
         // Pass the current time to renet, so it can use it to order messages
         SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap(),
@@ -42,7 +51,7 @@ fn main() {
         UdpSocket::bind(server_addr).unwrap()
     ).unwrap();
 
-    trace!("🕹  TicTacTussle server listening on {}", server_addr);
+    println!("🕹  TicTacTussle server listening on {}", server_addr);
 
     let mut game_state = store::game::GameState::new();
     let mut last_updated = Instant::now();
@@ -66,23 +75,25 @@ fn main() {
                         server.send_message(id, 0, bincode::serialize(&event).unwrap());
                     }
 
+                    let decoded_name = name_from_user_data(&user_data);
+
                     // Add the new player to the game
                     let event = store::game::GameEvent::PlayerJoined {
                         player_id: id,
-                        name: name_from_user_data(&user_data),
+                        name: decoded_name.clone(),
                     };
                     game_state.consume(&event);
 
                     // Tell all players that a new player has joined
                     server.broadcast_message(0, bincode::serialize(&event).unwrap());
 
-                    info!("Client {} connected.", id);
+                    println!("Client {} ({}) connected.", id, decoded_name);
                     // In TicTacTussle the game can begin once two players has joined
                     if game_state.players.len() > 2 {
                         // let event = store::game::GameEvent::BeginGame { goes_first: id };
                         // game_state.consume(&event);
                         // server.broadcast_message(0, bincode::serialize(&event).unwrap());
-                        // trace!("The game gas begun");
+                        // println!("The game gas begun");
                     }
                 }
                 ServerEvent::ClientDisconnected(id) => {
@@ -113,7 +124,7 @@ fn main() {
                 if let Ok(event) = bincode::deserialize::<store::game::GameEvent>(&message) {
                     if game_state.validate(&event) {
                         game_state.consume(&event);
-                        trace!("Player {} sent:\n\t{:#?}", client_id, event);
+                        println!("Player {} sent:\n\t{:#?}", client_id, event);
                         server.broadcast_message(0, bincode::serialize(&event).unwrap());
 
                         // Determine if a player has won the game
