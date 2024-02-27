@@ -1,8 +1,22 @@
-pub enum Direction {
+use glam::f32::Vec3;
+
+#[derive(Clone)]
+pub enum PlayerDirection {
     North,
     East,
     South,
     West,
+}
+
+impl PlayerDirection {
+    pub fn value(&self) -> Vec3 {
+        match *self {
+            PlayerDirection::East => Vec3::new(1.0, 0.0, 0.0),
+            PlayerDirection::West => Vec3::new(-1.0, 0.0, 0.0),
+            PlayerDirection::North => Vec3::new(0.0, 0.0, -1.0),
+            PlayerDirection::South => Vec3::new(0.0, 0.0, 1.0),
+        }
+    }
 }
 
 pub struct Player {
@@ -10,12 +24,12 @@ pub struct Player {
     pub name: String,
     pub x: u32,
     pub y: u32,
-    pub direction: Direction,
+    pub direction: PlayerDirection,
 }
 
 impl Player {
     pub fn new(id: u64, name: String) -> Self {
-        Player { id, name, x: 0, y: 0, direction: Direction::East }
+        Player { id, name, x: 0, y: 0, direction: PlayerDirection::East }
     }
 
     fn movement(&self) {
