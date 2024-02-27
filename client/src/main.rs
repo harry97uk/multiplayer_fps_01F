@@ -2,8 +2,10 @@ use bevy::prelude::*;
 use bevy_renet::{ run_if_client_connected, RenetClientPlugin };
 use network::*;
 use store::game::*;
+use setup::*;
 
 mod network;
+mod setup;
 
 fn main() {
     let username = String::from("Harry");
@@ -11,11 +13,11 @@ fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
             title: format!("TicTacTussle <{}>", username),
-            width: 480.0,
-            height: 540.0,
+            width: 800.0,
+            height: 600.0,
             ..default()
         })
-        .insert_resource(ClearColor(Color::hex("282828").unwrap()))
+        .insert_resource(ClearColor(Color::WHITE))
         .add_plugins(DefaultPlugins)
         // Renet setup
         .add_plugin(RenetClientPlugin)
@@ -25,6 +27,7 @@ fn main() {
             CoreStage::PostUpdate,
             receive_events_from_server.with_run_criteria(run_if_client_connected)
         )
+        .add_startup_system(setup)
         // Add our game state and register GameEvent as a bevy event
         .insert_resource(GameState::new())
         .add_event::<GameEvent>()

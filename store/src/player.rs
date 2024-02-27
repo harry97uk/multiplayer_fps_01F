@@ -8,9 +8,9 @@ pub enum Direction {
 pub struct Player {
     id: u64,
     pub name: String,
-    x: u32,
-    y: u32,
-    direction: Direction,
+    pub x: u32,
+    pub y: u32,
+    pub direction: Direction,
 }
 
 impl Player {

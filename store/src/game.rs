@@ -7,7 +7,7 @@ use crate::{ map::Map, player::Player };
 type PlayerId = u64;
 
 pub struct GameState {
-    map: Map,
+    pub map: Map,
     pub players: HashMap<PlayerId, Player>,
     history: Vec<GameEvent>,
     active: bool,
@@ -22,6 +22,10 @@ pub enum GameEvent {
     },
     PlayerDisconnected {
         player_id: PlayerId,
+    },
+    PlayedMoved {
+        player_id: PlayerId,
+        new_position: (u32, u32),
     },
 }
 
@@ -49,6 +53,9 @@ impl GameState {
                     return false;
                 }
             }
+            PlayedMoved { player_id, new_position } => {
+                //make sure it is a valid position to move to
+            }
         }
         true
     }
@@ -62,6 +69,10 @@ impl GameState {
             }
             PlayerDisconnected { player_id, .. } => {
                 self.players.remove(player_id);
+            }
+            PlayedMoved { player_id, new_position } => {
+                self.players.get_mut(player_id).expect("no player with id").x = new_position.0;
+                self.players.get_mut(player_id).expect("no player with id").y = new_position.1;
             }
         }
 
