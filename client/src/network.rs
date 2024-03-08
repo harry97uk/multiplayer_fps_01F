@@ -76,3 +76,7 @@ pub fn handle_renet_error(mut renet_error: EventReader<RenetError>) {
         panic!("{}", err);
     }
 }
+
+pub fn client_disconnect(mut client: ResMut<RenetClient>) {
+    client.disconnect()
+}

@@ -1,6 +1,7 @@
 use glam::f32::Vec3;
+use serde::{ Serialize, Deserialize };
 
-#[derive(Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PlayerDirection {
     North,
     East,
@@ -19,27 +20,24 @@ impl PlayerDirection {
     }
 }
 
+pub enum PlayerStartingPositions {
+    TopLeft,
+    BottomLeft,
+    TopRight,
+    BottomRight,
+}
+
 pub struct Player {
-    id: u64,
+    pub id: u64,
     pub name: String,
-    pub x: u32,
-    pub y: u32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
     pub direction: PlayerDirection,
 }
 
 impl Player {
     pub fn new(id: u64, name: String) -> Self {
-        Player { id, name, x: 0, y: 0, direction: PlayerDirection::East }
+        Player { id, name, x: 1.0, y: 0.2, z: 1.0, direction: PlayerDirection::East }
     }
-
-    fn movement(&self) {
-        let mut dx = 0;
-        let mut dy = 0;
-    }
-
-    fn update(&self) {
-        self.movement();
-    }
-
-    fn render(&mut self) {}
 }

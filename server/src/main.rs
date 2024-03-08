@@ -1,4 +1,4 @@
-use log::{ info, trace, warn };
+use log::{ info, warn };
 use renet::{
     RenetConnectionConfig,
     RenetServer,
@@ -51,7 +51,7 @@ fn main() {
         UdpSocket::bind(server_addr).unwrap()
     ).unwrap();
 
-    println!("🕹  TicTacTussle server listening on {}", server_addr);
+    println!("🕹 Maze Wars server listening on {}", server_addr);
 
     let mut game_state = store::game::GameState::new();
     let mut last_updated = Instant::now();
@@ -66,7 +66,7 @@ fn main() {
         while let Some(event) = server.get_event() {
             match event {
                 ServerEvent::ClientConnected(id, user_data) => {
-                    // Tell the recently joined player about the other player
+                    // Tell the recently joined player about the other players
                     for (player_id, player) in game_state.players.iter() {
                         let event = store::game::GameEvent::PlayerJoined {
                             player_id: *player_id,
