@@ -2,7 +2,7 @@ use std::{ collections::HashMap };
 
 use serde::{ Serialize, Deserialize };
 
-use crate::{ map::Map, player::{ Player, PlayerDirection } };
+use crate::{ map::Map, player::{ Player, PlayerDirection, PlayerStartingPositions } };
 
 type PlayerId = u64;
 
@@ -70,7 +70,20 @@ impl GameState {
         use GameEvent::*;
         match event {
             PlayerJoined { player_id, name } => {
-                self.players.insert(*player_id, Player::new(*player_id, name.to_string()));
+                let starting_position = match self.players.len() {
+                    0 => Ok(PlayerStartingPositions::TopLeft),
+                    1 => Ok(PlayerStartingPositions::TopRight),
+                    2 => Ok(PlayerStartingPositions::BottomLeft),
+                    3 => Ok(PlayerStartingPositions::BottomRight),
+                    _ => Err("too many players"),
+                };
+                self.players.insert(
+                    *player_id,
+                    Player::new(*player_id, name.to_string(), starting_position.unwrap(), (
+                        self.map.mini_map[0].len(),
+                        self.map.mini_map.len(),
+                    ))
+                );
             }
             PlayerDisconnected { player_id, .. } => {
                 self.players.remove(player_id);

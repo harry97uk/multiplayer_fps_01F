@@ -66,11 +66,19 @@ fn main() {
         while let Some(event) = server.get_event() {
             match event {
                 ServerEvent::ClientConnected(id, user_data) => {
-                    // Tell the recently joined player about the other players
+                    // Tell the recently joined player about the other players and initialise positions
                     for (player_id, player) in game_state.players.iter() {
                         let event = store::game::GameEvent::PlayerJoined {
                             player_id: *player_id,
                             name: player.name.clone(),
+                        };
+                        server.send_message(id, 0, bincode::serialize(&event).unwrap());
+
+                        //initialise player positions
+                        let event = store::game::GameEvent::PlayerMoved {
+                            player_id: *player_id,
+                            new_position: (player.x, player.z),
+                            new_direction: (player.direction, 0.0),
                         };
                         server.send_message(id, 0, bincode::serialize(&event).unwrap());
                     }
@@ -85,6 +93,17 @@ fn main() {
                     game_state.consume(&event);
 
                     // Tell all players that a new player has joined
+                    server.broadcast_message(0, bincode::serialize(&event).unwrap());
+
+                    let client_player = game_state.players.get(&id).expect("cant find player");
+
+                    //initialise position
+                    let event = store::game::GameEvent::PlayerMoved {
+                        player_id: id,
+                        new_position: (client_player.x, client_player.z),
+                        new_direction: (client_player.direction, 0.0),
+                    };
+                    game_state.consume(&event);
                     server.broadcast_message(0, bincode::serialize(&event).unwrap());
 
                     println!("Client {} ({}) connected.", id, decoded_name);

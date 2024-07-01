@@ -37,7 +37,28 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(id: u64, name: String) -> Self {
-        Player { id, name, x: 1.0, y: 0.2, z: 1.0, direction: PlayerDirection::East }
+    pub fn new(
+        id: u64,
+        name: String,
+        starting_position: PlayerStartingPositions,
+        map_size: (usize, usize)
+    ) -> Self {
+        let (x, z, direction) = match starting_position {
+            PlayerStartingPositions::TopLeft => (1.0, 1.0, PlayerDirection::East),
+            PlayerStartingPositions::BottomLeft =>
+                (1.0, (map_size.1 as f32) - 2.0, PlayerDirection::East),
+            PlayerStartingPositions::TopRight =>
+                ((map_size.0 as f32) - 2.0, 1.0, PlayerDirection::West),
+            PlayerStartingPositions::BottomRight =>
+                ((map_size.0 as f32) - 2.0, (map_size.1 as f32) - 2.0, PlayerDirection::West),
+        };
+        Player {
+            id,
+            name,
+            x,
+            y: 0.2,
+            z,
+            direction,
+        }
     }
 }
