@@ -87,13 +87,13 @@ fn spawn_player(
     game_state: &Res<GameState>,
     player_id: u64
 ) {
-    println!("spawning player");
     let player_mesh = mesh_assets.add(
         Mesh::from(shape::Icosphere { radius: 0.2, subdivisions: 5 })
     );
 
     for player in game_state.players.iter() {
         if *player.0 == player_id {
+            println!("spawning player at {} {}", player.1.x, player.1.z);
             commands
                 .spawn()
                 .insert_bundle(PbrBundle {
